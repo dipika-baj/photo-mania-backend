@@ -1,8 +1,8 @@
-import express, { Request } from "express";
-import { verifyToken } from "../middleware/auth";
+import express from "express";
+
 import { meController } from "../controllers/me.controller";
+import { verifyToken } from "../middleware/auth";
 import { upload } from "../middleware/imageUpload";
-import { authController } from "../controllers";
 
 const meRouter = express.Router();
 
@@ -15,6 +15,5 @@ meRouter.put(
   meController.updatePost
 );
 meRouter.delete("/post/:id", verifyToken, meController.deletePost);
-meRouter.delete("/logout", verifyToken, meController.logout);
 
 export { meRouter };

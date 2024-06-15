@@ -1,17 +1,16 @@
-import { Request, Response } from "express";
+import { Response } from "express";
+import fs from "fs";
+
 import { AuthenticatedRequest } from "../middleware/auth";
 import { postService } from "../services";
 import { userService } from "../services/user.service";
-import fs from "fs";
-import { log } from "console";
+import { failure, success } from "../utils/response";
 
 async function viewPosts(req: AuthenticatedRequest, res: Response) {
   try {
     const userId = Number(req.user!.id);
     const posts = await postService.view(userId);
-    return res.status(200).json({
-      posts,
-    });
+    return res.status(200).json(success(posts));
   } catch (err) {
     return res.status(500).json({
       message: err,
@@ -24,13 +23,11 @@ async function getDetails(req: AuthenticatedRequest, res: Response) {
     const userId = Number(req.user!.id);
     const userDetails = await userService.getDetails(userId);
     if (!userDetails) {
-      return res.status(404).json({
-        message: "User not found",
-      });
+      return res
+        .status(404)
+        .json(failure({ message: "User not found", code: "userNotFound" }));
     }
-    return res.status(200).json({
-      user: userDetails,
-    });
+    return res.status(200).json(success(userDetails));
   } catch (err) {
     return res.status(500).json({
       message: err,
@@ -51,9 +48,9 @@ async function updatePost(req: AuthenticatedRequest, res: Response) {
     const post = await postService.getPost({ id, userId });
 
     if (!post) {
-      return res.status(400).json({
-        message: "Post not found",
-      });
+      return res
+        .status(400)
+        .json(failure({ message: "Post not found", code: "postNotFound" }));
     }
     if (imageUrl) {
       prev_image = await postService.getImage({ id, userId });
@@ -67,17 +64,17 @@ async function updatePost(req: AuthenticatedRequest, res: Response) {
     if (prev_image) {
       fs.unlink(prev_image!.imageUrl, (err) => {
         if (err) {
-          return res.status(500).json({
-            message: "Post could not be deleted",
-          });
+          return res.status(500).json(
+            failure({
+              message: "Post could not be updated",
+              code: "postNotUpdated",
+            })
+          );
         }
       });
     }
 
-    return res.status(200).json({
-      message: `Post ${id} by ${userId} updated`,
-      post: updatedPost,
-    });
+    return res.status(200).json(success(updatedPost));
   } catch (err) {
     return res.status(500).json({
       message: err,
@@ -93,42 +90,25 @@ async function deletePost(req: AuthenticatedRequest, res: Response) {
     const post = await postService.getPost({ id, userId });
 
     if (!post) {
-      return res.status(404).json({
-        message: "Post not found",
-      });
+      return res
+        .status(404)
+        .json(failure({ message: "Post not found", code: "postNotFound" }));
     }
     const deletedPost = await postService.remove(post);
 
-    if (!deletedPost) {
-      throw new Error("Post could not be deleted");
-    }
-
     fs.unlink(deletedPost.imageUrl, (err) => {
       if (err) {
-        return res.status(500).json({
-          message: "Post could not be deleted",
-        });
+        return res.status(500).json(
+          failure({
+            message: "Post could not be deleted",
+            code: "postNotDeleted",
+          })
+        );
       }
     });
-    return res.status(200).json({
-      message: `Post ${id} by user ${userId} deleted`,
-    });
+    return res.status(200).json(success("success"));
   } catch (err) {
     return res.status(500).json({
-      message: err,
-    });
-  }
-}
-
-async function logout(req: AuthenticatedRequest, res: Response) {
-  try {
-    const userId = req.user!.id;
-
-    res.status(200).json({
-      message: `User ${userId} has been logged out`,
-    });
-  } catch (err) {
-    res.status(500).json({
       message: err,
     });
   }
@@ -139,5 +119,4 @@ export const meController = {
   getDetails,
   updatePost,
   deletePost,
-  logout,
 };
