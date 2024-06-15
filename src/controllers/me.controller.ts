@@ -10,7 +10,7 @@ async function viewPosts(req: AuthenticatedRequest, res: Response) {
   try {
     const userId = Number(req.user!.id);
     const posts = await postService.view(userId);
-    return res.status(200).json(success(posts));
+    return res.status(200).json(success({ data: posts }));
   } catch (err) {
     return res.status(500).json({
       message: err,
@@ -27,7 +27,7 @@ async function getDetails(req: AuthenticatedRequest, res: Response) {
         .status(404)
         .json(failure({ message: "User not found", code: "userNotFound" }));
     }
-    return res.status(200).json(success(userDetails));
+    return res.status(200).json(success({ data: userDetails }));
   } catch (err) {
     return res.status(500).json({
       message: err,
@@ -74,7 +74,7 @@ async function updatePost(req: AuthenticatedRequest, res: Response) {
       });
     }
 
-    return res.status(200).json(success(updatedPost));
+    return res.status(200).json(success({ data: updatedPost }));
   } catch (err) {
     return res.status(500).json({
       message: err,
@@ -106,7 +106,7 @@ async function deletePost(req: AuthenticatedRequest, res: Response) {
         );
       }
     });
-    return res.status(200).json(success("success"));
+    return res.status(200).json(success({ data: "success" }));
   } catch (err) {
     return res.status(500).json({
       message: err,

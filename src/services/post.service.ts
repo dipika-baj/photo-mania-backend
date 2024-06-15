@@ -1,5 +1,6 @@
 import { database } from "../datasource";
 import { Post } from "../entity/Post.entity";
+import { getPagination } from "../utils/pagination";
 
 const postRepository = database.getRepository(Post);
 
@@ -27,11 +28,20 @@ async function create({
   return post;
 }
 
-async function list() {
-  const posts = await postRepository.find({
+async function list({ pageSize, page }: { pageSize: number; page: number }) {
+  const [posts, count] = await postRepository.findAndCount({
+    skip: (page - 1) * pageSize,
+    take: pageSize,
     relations: ["user"],
+    order: {
+      createdAt: "DESC",
+    },
   });
-  return posts;
+  //TODO:reusable function for limit and offset
+
+  const pagination = getPagination({ count, page, pageSize });
+
+  return { posts, pagination };
 }
 
 async function view(userId: number) {

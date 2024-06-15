@@ -1,5 +1,13 @@
-export const success = <T>(data: T) => {
-  return { status: "success", data: data };
+import { Pagination } from "./pagination";
+
+export const success = <T>({
+  data,
+  pagination,
+}: {
+  data: T;
+  pagination?: Pagination;
+}) => {
+  return { status: "success", data: data, pagination: pagination };
 };
 
 export const failure = ({

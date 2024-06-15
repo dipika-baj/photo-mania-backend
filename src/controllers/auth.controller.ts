@@ -83,7 +83,7 @@ async function register(req: Request, res: Response) {
       username,
     });
 
-    return res.status(201).json(success(user.user));
+    return res.status(201).json(success({ data: user.user }));
   } catch (err) {
     return res.status(500).json({
       message: err,
@@ -133,9 +133,11 @@ async function login(req: Request, res: Response) {
 
     return res.json(
       success({
-        id: userId,
-        emailUsername: emailUsername,
-        token: token,
+        data: {
+          id: userId,
+          emailUsername: emailUsername,
+          token: token,
+        },
       })
     );
   } catch (err) {
@@ -147,7 +149,7 @@ async function login(req: Request, res: Response) {
 
 async function logout(req: Request, res: Response) {
   try {
-    res.status(200).json(success("sucess"));
+    res.status(200).json(success({ data: "sucess" }));
   } catch (err) {
     res.status(500).json({
       message: err,
