@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
-import { JWT_EXPIRE, JWT_SECRET } from "./env";
+
+import { JWT_SECRET } from "./env";
 
 export async function getToken(id: number) {
   const token = jwt.sign(

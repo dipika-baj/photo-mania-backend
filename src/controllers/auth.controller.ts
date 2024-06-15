@@ -1,12 +1,14 @@
+import bcrypt from "bcrypt";
 import { Request, Response } from "express";
+
+import { authService } from "../services/auth.service";
 import {
   EMAIL_REGEX,
   PASSWORD_REGEX,
   USERNAME_REGEX,
 } from "../utils/constants";
-import bcrypt from "bcrypt";
 import { getToken } from "../utils/jwt";
-import { authService } from "../services/auth.service";
+import { failure, success } from "../utils/response";
 
 async function register(req: Request, res: Response) {
   try {
@@ -19,45 +21,52 @@ async function register(req: Request, res: Response) {
       !password.trim() ||
       !username.trim()
     ) {
-      return res.status(400).json({
-        message: "Empty field",
-      });
+      return res.status(400).json(failure({ message: "Empty Fields" }));
     }
 
     if (!email.match(EMAIL_REGEX)) {
-      return res.status(400).json({
-        message: "Invalid email",
-      });
+      return res.status(400).json(failure({ message: "Invalid email" }));
     }
 
     if (!password.match(PASSWORD_REGEX)) {
-      return res.status(400).json({
-        message:
-          "Password must contain minimum eight characters, at least one letter, one number and one special character",
-      });
+      return res.status(400).json(
+        failure({
+          message:
+            "Password must contain minimum eight characters, at least one letter, one number and one special character",
+        })
+      );
+      0;
     }
 
     if (!username.match(USERNAME_REGEX)) {
-      return res.status(400).json({
-        message:
-          "Username can only contain letters, digits, and underscores, must be minimum 7 character and start with letter or underscore.",
-      });
+      return res.status(400).json(
+        failure({
+          code: "username",
+          message:
+            "Username can only contain letters, digits, and underscores, must be minimum 7 character and start with letter or underscore.",
+        })
+      );
     }
 
     const emailExists = await authService.findEmail(email);
 
     if (emailExists) {
-      return res.status(400).json({
-        message: "This email already exists.",
-      });
+      return res
+        .status(400)
+        .json(
+          failure({ code: "email", message: "This email already exists." })
+        );
     }
 
     const usernameExists = await authService.findUsername(username);
 
     if (usernameExists) {
-      return res.status(400).json({
-        message: "This username is already taken.",
-      });
+      return res.status(400).json(
+        failure({
+          code: "username",
+          message: "This username is already taken.",
+        })
+      );
     }
 
     const encryptedPassword = await bcrypt
@@ -74,12 +83,8 @@ async function register(req: Request, res: Response) {
       username,
     });
 
-    return res.status(201).json({
-      message: "User created",
-      user: user.user,
-    });
+    return res.status(201).json(success(user.user));
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       message: err,
     });
@@ -88,20 +93,23 @@ async function register(req: Request, res: Response) {
 
 async function login(req: Request, res: Response) {
   try {
-    const { email_username, password } = req.body;
+    const { emailUsername, password } = req.body;
 
-    if (!email_username.trim()) {
+    if (!emailUsername.trim()) {
       return res.status(400).json({
         message: "Email cannot be empty",
       });
     }
 
-    const userPassword = await authService.findPassword(email_username);
+    const userPassword = await authService.findPassword(emailUsername);
 
     if (!userPassword) {
-      return res.status(400).json({
-        message: "Incorrect email or password",
-      });
+      return res.status(400).json(
+        failure({
+          code: "incorrect",
+          message: "Incorrect email or password",
+        })
+      );
     }
 
     const passwordMatch = await bcrypt
@@ -111,28 +119,39 @@ async function login(req: Request, res: Response) {
       });
 
     if (!passwordMatch) {
-      return res.status(400).json({
-        message: "Incorrect email or password",
-      });
+      return res.status(400).json(
+        failure({
+          code: "incorrect",
+          message: "Incorrect email or password",
+        })
+      );
     }
 
-    const userId = Number(await authService.findId(email_username));
+    const userId = Number(await authService.findId(emailUsername));
 
     const token = await getToken(userId);
 
-    return res.json({
-      message: "User logged in",
-      user: {
+    return res.json(
+      success({
         id: userId,
-        email_username: email_username,
+        emailUsername: emailUsername,
         token: token,
-      },
-    });
+      })
+    );
   } catch (err) {
-    console.log(err);
     return res.status(500).json({
       message: err,
     });
   }
 }
-export const authController = { register, login };
+
+async function logout(req: Request, res: Response) {
+  try {
+    res.status(200).json(success("sucess"));
+  } catch (err) {
+    res.status(500).json({
+      message: err,
+    });
+  }
+}
+export const authController = { register, login, logout };

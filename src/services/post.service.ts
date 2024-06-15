@@ -28,7 +28,9 @@ async function create({
 }
 
 async function list() {
-  const posts = await postRepository.find();
+  const posts = await postRepository.find({
+    relations: ["user"],
+  });
   return posts;
 }
 

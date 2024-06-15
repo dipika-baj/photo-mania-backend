@@ -58,34 +58,35 @@ async function findUsername(username: string) {
   return userEmail;
 }
 
-async function findPassword(email_username: string) {
+async function findPassword(emailUsername: string) {
   const userPassword = await userRepository.findOne({
     select: {
       password: true,
     },
     where: [
       {
-        email: email_username,
+        email: emailUsername,
       },
       {
-        username: email_username,
+        username: emailUsername,
       },
     ],
   });
+
   return userPassword;
 }
 
-async function findId(email_username: string) {
+async function findId(emailUsername: string) {
   const userId = await userRepository.findOne({
     select: {
       id: true,
     },
     where: [
       {
-        email: email_username,
+        email: emailUsername,
       },
       {
-        username: email_username,
+        username: emailUsername,
       },
     ],
   });

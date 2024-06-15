@@ -1,7 +1,8 @@
 import express from "express";
-import { verifyToken } from "../middleware/auth";
+
 import { postController } from "../controllers";
-import { ImageRequest, checkFileType, upload } from "../middleware/imageUpload";
+import { verifyToken } from "../middleware/auth";
+import { checkFileType, upload } from "../middleware/imageUpload";
 
 const postRouter = express.Router();
 
