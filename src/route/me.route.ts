@@ -9,7 +9,7 @@ const meRouter = express.Router();
 meRouter.get("/posts", verifyToken, meController.viewPosts);
 meRouter.get("/user", verifyToken, meController.getDetails);
 meRouter.put(
-  "/post/:id",
+  "/post/:postid",
   verifyToken,
   upload.single("image"),
   meController.updatePost

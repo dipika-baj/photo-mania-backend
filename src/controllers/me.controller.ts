@@ -21,7 +21,7 @@ async function viewPosts(req: AuthenticatedRequest, res: Response) {
 async function getDetails(req: AuthenticatedRequest, res: Response) {
   try {
     const userId = Number(req.user!.id);
-    const userDetails = await userService.getDetails(userId);
+    const userDetails = await userService.getDetails({ userId });
     if (!userDetails) {
       return res
         .status(404)
@@ -37,7 +37,7 @@ async function getDetails(req: AuthenticatedRequest, res: Response) {
 
 async function updatePost(req: AuthenticatedRequest, res: Response) {
   try {
-    const id = Number(req.params.id);
+    const postId = Number(req.params.postId);
     const userId = req.user!.id;
     const image = req.file;
     const imageUrl = image?.path;
@@ -45,7 +45,7 @@ async function updatePost(req: AuthenticatedRequest, res: Response) {
     const caption = req.body.caption;
     let prev_image;
 
-    const post = await postService.getPost({ id, userId });
+    const post = await postService.getPost({ postId, userId });
 
     if (!post) {
       return res
@@ -53,7 +53,7 @@ async function updatePost(req: AuthenticatedRequest, res: Response) {
         .json(failure({ message: "Post not found", code: "postNotFound" }));
     }
     if (imageUrl) {
-      prev_image = await postService.getImage({ id, userId });
+      prev_image = await postService.getImage({ id: postId, userId });
     }
     const updatedPost = await postService.update(post, {
       imageUrl,
@@ -84,10 +84,10 @@ async function updatePost(req: AuthenticatedRequest, res: Response) {
 
 async function deletePost(req: AuthenticatedRequest, res: Response) {
   try {
-    const id = Number(req.params.id);
+    const postId = Number(req.params.id);
     const userId = req.user!.id;
 
-    const post = await postService.getPost({ id, userId });
+    const post = await postService.getPost({ postId, userId });
 
     if (!post) {
       return res
