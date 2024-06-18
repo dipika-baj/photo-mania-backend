@@ -9,7 +9,7 @@ export async function getToken(id: number) {
     },
     JWT_SECRET,
     {
-      expiresIn: "1h",
+      expiresIn: "1d",
     }
   );
 

@@ -16,6 +16,8 @@ postRouter.post(
 //TODO :middleware for pagination
 postRouter.get("/", postController.list);
 
+postRouter.get("/:postId", postController.details);
+
 //TODO :fix route
 postRouter.get("/:uid", verifyToken, postController.listByUserId);
 

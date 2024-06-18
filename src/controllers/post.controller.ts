@@ -75,8 +75,21 @@ async function listByUserId(req: Request, res: Response) {
   }
 }
 
+async function details(req: Request, res: Response) {
+  try {
+    const postId = Number(req.params.postId);
+    const posts = await postService.details({ postId });
+    return res.status(200).json(success({ data: posts }));
+  } catch (err) {
+    return res.status(500).json({
+      message: err,
+    });
+  }
+}
+
 export const postController = {
   create,
   list,
   listByUserId,
+  details,
 };

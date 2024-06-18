@@ -73,10 +73,10 @@ async function remove(post: Post) {
   return removedPost;
 }
 
-async function getPost({ id, userId }: { id: number; userId: number }) {
+async function getPost({ postId, userId }: { postId: number; userId: number }) {
   const post = await postRepository.findOne({
     where: {
-      id: id,
+      id: postId,
       user: {
         id: userId,
       },
@@ -103,6 +103,16 @@ async function getImage({
   return image;
 }
 
+async function details({ postId }: { postId: number }) {
+  const post = await postRepository.find({
+    where: {
+      id: postId,
+    },
+    relations: ["user"],
+  });
+  return post;
+}
+
 export const postService = {
   create,
   list,
@@ -111,4 +121,5 @@ export const postService = {
   remove,
   getPost,
   getImage,
+  details,
 };
