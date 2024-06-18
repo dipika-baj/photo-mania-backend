@@ -35,7 +35,7 @@ async function create(req: AuthenticatedRequest, res: Response) {
       caption,
     });
 
-    return res.status(201).json(success(post));
+    return res.status(201).json(success({ data: post }));
   } catch (err) {
     return res.status(500).json({
       message: err,
@@ -45,8 +45,17 @@ async function create(req: AuthenticatedRequest, res: Response) {
 
 async function list(req: Request, res: Response) {
   try {
-    const posts = await postService.list();
-    return res.status(200).json(success(posts));
+    const page = Number(req.query.page);
+    const pageSize = Number(req.query.pageSize);
+
+    const { posts, pagination } = await postService.list({
+      page: page,
+      pageSize: pageSize,
+    });
+
+    return res
+      .status(200)
+      .json(success({ data: posts, pagination: pagination }));
   } catch (err) {
     return res.status(500).json({
       message: err,
@@ -54,11 +63,11 @@ async function list(req: Request, res: Response) {
   }
 }
 
-async function viewPosts(req: Request, res: Response) {
+async function listByUserId(req: Request, res: Response) {
   try {
     const userId = Number(req.params.uid);
     const posts = await postService.view(userId);
-    return res.status(200).json(success(posts));
+    return res.status(200).json(success({ data: posts }));
   } catch (err) {
     return res.status(500).json({
       message: err,
@@ -69,5 +78,5 @@ async function viewPosts(req: Request, res: Response) {
 export const postController = {
   create,
   list,
-  viewPosts,
+  listByUserId,
 };

@@ -13,7 +13,10 @@ postRouter.post(
   checkFileType,
   postController.create
 );
+//TODO :middleware for pagination
 postRouter.get("/", postController.list);
-postRouter.get("/:uid", verifyToken, postController.viewPosts);
+
+//TODO :fix route
+postRouter.get("/:uid", verifyToken, postController.listByUserId);
 
 export { postRouter };
