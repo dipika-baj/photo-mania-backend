@@ -63,18 +63,6 @@ async function list(req: Request, res: Response) {
   }
 }
 
-async function listByUserId(req: Request, res: Response) {
-  try {
-    const userId = Number(req.params.uid);
-    const posts = await postService.view(userId);
-    return res.status(200).json(success({ data: posts }));
-  } catch (err) {
-    return res.status(500).json({
-      message: err,
-    });
-  }
-}
-
 async function details(req: Request, res: Response) {
   try {
     const postId = Number(req.params.postId);
@@ -90,6 +78,5 @@ async function details(req: Request, res: Response) {
 export const postController = {
   create,
   list,
-  listByUserId,
   details,
 };

@@ -29,6 +29,12 @@ export class User {
   @Column({ select: false })
   password!: string;
 
+  @Column()
+  imageUrl!: string;
+
+  @Column()
+  imageName!: string;
+
   @Column({
     type: "timestamp",
     default: () => "CURRENT_TIMESTAMP",

@@ -44,17 +44,30 @@ async function list({ pageSize, page }: { pageSize: number; page: number }) {
   return { posts, pagination };
 }
 
-async function view(userId: number) {
-  const posts = await postRepository.find({
-    relations: ["user"],
+async function listByUserId({
+  pageSize,
+  page,
+  userId,
+}: {
+  pageSize: number;
+  page: number;
+  userId: number;
+}) {
+  const [posts, count] = await postRepository.findAndCount({
     where: {
       user: {
         id: userId,
       },
     },
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+    order: {
+      createdAt: "DESC",
+    },
   });
+  const pagination = getPagination({ count, page, pageSize });
 
-  return posts;
+  return { posts, pagination };
 }
 
 async function update(
@@ -116,7 +129,7 @@ async function details({ postId }: { postId: number }) {
 export const postService = {
   create,
   list,
-  view,
+  listByUserId,
   update,
   remove,
   getPost,

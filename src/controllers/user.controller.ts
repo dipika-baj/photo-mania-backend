@@ -15,6 +15,27 @@ async function details(req: Request, res: Response) {
   }
 }
 
+async function getPosts(req: Request, res: Response) {
+  try {
+    const userId = Number(req.params.userId);
+    const page = Number(req.query.page);
+    const pageSize = Number(req.query.pageSize);
+
+    const { posts, pagination } = await postService.listByUserId({
+      page: page,
+      pageSize: pageSize,
+      userId,
+    });
+
+    return res.status(200).json(success({ data: posts, pagination }));
+  } catch (err) {
+    return res.status(500).json({
+      message: err,
+    });
+  }
+}
+
 export const userController = {
   details,
+  getPosts,
 };
