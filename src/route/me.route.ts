@@ -7,7 +7,7 @@ import { upload } from "../middleware/imageUpload";
 const meRouter = express.Router();
 
 // meRouter.get("/posts", verifyToken, meController.viewPosts);
-meRouter.get("/user", verifyToken, meController.getDetails);
+meRouter.get("/", verifyToken, meController.getDetails);
 meRouter.put(
   "/post/:postId",
   verifyToken,
@@ -16,6 +16,7 @@ meRouter.put(
 );
 meRouter.delete("/post/:id", verifyToken, meController.deletePost);
 meRouter.put("/", verifyToken, upload.single("image"), meController.edit);
+meRouter.put("/removePic", verifyToken, meController.removeProfilePic);
 
 // TODO: Fix route
 export { meRouter };
