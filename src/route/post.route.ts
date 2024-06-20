@@ -18,4 +18,13 @@ postRouter.get("/", postController.list);
 
 postRouter.get("/:postId", postController.details);
 
+postRouter.put(
+  "/:postId",
+  verifyToken,
+  upload.single("image"),
+  postController.update
+);
+
+postRouter.delete("/:postId", verifyToken, postController.remove);
+
 export { postRouter };
