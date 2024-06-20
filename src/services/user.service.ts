@@ -42,6 +42,7 @@ async function update(
   values: {
     firstName?: string;
     lastName?: string;
+    username?: string;
     imageUrl?: string;
     imageName?: string;
   }
@@ -51,9 +52,19 @@ async function update(
   return newUser;
 }
 
+// async function removeProfilePic(user: User) {
+//   const newUser = userRepository.merge(user, {
+//     imageName: "",
+//     imageUrl: "",
+//   });
+//   await userRepository.save(newUser);
+//   return newUser;
+// }
+
 export const userService = {
   getDetails,
   getDetailsByUsername,
   getProfilePicture,
   update,
+  // removeProfilePic,
 };

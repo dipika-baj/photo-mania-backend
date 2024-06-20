@@ -2,9 +2,10 @@ import { Response } from "express";
 import fs from "fs";
 
 import { AuthenticatedRequest } from "../middleware/auth";
-import { postService } from "../services";
+import { authService, postService } from "../services";
 import { userService } from "../services/user.service";
 import { failure, success } from "../utils/response";
+import { USERNAME_REGEX } from "../utils/constants";
 
 // async function viewPosts(req: AuthenticatedRequest, res: Response) {
 //   try {
@@ -122,7 +123,8 @@ async function edit(req: AuthenticatedRequest, res: Response) {
     const imageName = image?.originalname;
     const firstName = req.body.firstName;
     const lastName = req.body.lastName;
-    let prev_image;
+    const username = req.body.username;
+    let prevImage;
 
     const user = await userService.getDetails({ id });
 
@@ -131,20 +133,43 @@ async function edit(req: AuthenticatedRequest, res: Response) {
         .status(400)
         .json(failure({ message: "User not found", code: "userNotFound" }));
     }
+    if (username && user.username !== username) {
+      if (!username.match(USERNAME_REGEX)) {
+        return res.status(400).json(
+          failure({
+            code: "username",
+            message:
+              "Username can only contain letters, digits, and underscores, must be minimum 7 character and start with letter or underscore.",
+          })
+        );
+      }
+
+      const usernameExists = await authService.findUsername(username);
+
+      if (usernameExists) {
+        return res.status(400).json(
+          failure({
+            code: "username",
+            message: "This username is already taken.",
+          })
+        );
+      }
+    }
 
     if (imageUrl) {
-      prev_image = await userService.getProfilePicture({ id });
+      prevImage = await userService.getProfilePicture({ id });
     }
 
     const updatedUser = await userService.update(user, {
       lastName,
       firstName,
+      username,
       imageName,
       imageUrl,
     });
 
-    if (prev_image) {
-      fs.unlink(prev_image!.imageUrl, (err) => {
+    if (prevImage?.imageUrl) {
+      fs.unlink(prevImage!.imageUrl, (err) => {
         if (err) {
           return res.status(500).json(
             failure({
@@ -164,10 +189,49 @@ async function edit(req: AuthenticatedRequest, res: Response) {
   }
 }
 
+async function removeProfilePic(req: AuthenticatedRequest, res: Response) {
+  try {
+    const id = req.user!.id;
+    const user = await userService.getDetails({ id });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json(failure({ message: "User not found", code: "userNotFound" }));
+    }
+
+    const prevImage = await userService.getProfilePicture({ id });
+
+    const updatedUser = await userService.update(user, {
+      imageUrl: "",
+      imageName: "",
+    });
+
+    if (prevImage?.imageUrl) {
+      fs.unlink(prevImage.imageUrl, (err) => {
+        if (err) {
+          return res.status(500).json(
+            failure({
+              message: "Profile could not be updated",
+              code: "profileNotUpdated",
+            })
+          );
+        }
+      });
+    }
+    return res.status(200).json(success({ data: updatedUser }));
+  } catch (err) {
+    return res.status(500).json({
+      message: err,
+    });
+  }
+}
+
 export const meController = {
   // viewPosts,
   getDetails,
   updatePost,
   deletePost,
   edit,
+  removeProfilePic,
 };
