@@ -68,8 +68,14 @@ async function list(req: Request, res: Response) {
 async function details(req: Request, res: Response) {
   try {
     const postId = Number(req.params.postId);
-    const posts = await postService.details({ postId });
-    return res.status(200).json(success({ data: posts }));
+    const post = await postService.details({ postId });
+
+    if (!post)
+      return res
+        .status(404)
+        .json(failure({ message: "Post not found", code: "postNotFound" }));
+
+    return res.status(200).json(success({ data: post }));
   } catch (err) {
     return res.status(500).json({
       message: err,

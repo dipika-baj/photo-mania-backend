@@ -117,7 +117,7 @@ async function getImage({
 }
 
 async function details({ postId }: { postId: number }) {
-  const post = await postRepository.find({
+  const post = await postRepository.findOne({
     where: {
       id: postId,
     },
